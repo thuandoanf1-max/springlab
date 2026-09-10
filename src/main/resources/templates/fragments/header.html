@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <div th:fragment="header" class="header">
+        <div class="nav">
+            <a th:href="@{/admin/categories}">Manage Categories</a>
+            <a th:href="@{/admin/users}">Manage Users</a>
+        </div>
+        <div class="profile">
+            <!-- Profile avatar using student image from static/images -->
+            <img th:src="@{/images/Thuan.jpg}" alt="Student Avatar" class="avatar" />
+            <span th:if="${session.loggedInUser != null}" 
+                  th:text="'Welcome, ' + ${session.loggedInUser.fullname} + ' | '">Welcome, User | </span>
+            <a th:if="${session.loggedInUser != null}" th:href="@{/logout}">Logout</a>
+            <a th:if="${session.loggedInUser == null}" th:href="@{/login}">Login</a>
+        </div>
+    </div>
+</body>
+</html>
+

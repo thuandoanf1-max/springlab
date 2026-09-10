@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <title>SpringLab Admin Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+</head>
+<body>
+    <th:block th:replace="~{fragments/header :: header}"></th:block>
+
+    <div class="content" layout:fragment="content">
+        <!-- Content will be injected here -->
+    </div>
+
+    <th:block th:replace="~{fragments/footer :: footer}"></th:block>
+</body>
+</html>
+

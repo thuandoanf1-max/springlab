@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Manage Users</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <h2>Manage Users</h2>
+
+        <form th:action="@{/admin/users}" method="get">
+            <input type="text" name="keyword" th:value="${keyword}" placeholder="Search..." />
+            <button type="submit">Search</button>
+        </form>
+        <br/>
+        <a th:href="@{/admin/users/create}">Create New User</a>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Fullname</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="user : ${users}">
+                    <td th:text="${user.id}"></td>
+                    <td th:text="${user.username}"></td>
+                    <td th:text="${user.fullname}"></td>
+                    <td th:text="${user.email}"></td>
+                    <td th:text="${user.role}"></td>
+                    <td>
+                        <a th:href="@{/admin/users/edit/{id}(id=${user.id})}">Edit</a> |
+                        <a th:href="@{/admin/users/delete/{id}(id=${user.id})}" onclick="return confirm('Are you sure?');">Delete</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
+

@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,8 +32,23 @@ public class CategoryController {
     private static final String UPLOAD_DIR = "uploads/";
 
     @GetMapping
-    public String list(@RequestParam(required = false) String keyword, Model model) {
-        model.addAttribute("categories", categoryService.searchByName(keyword));
+    public String list(@RequestParam(required = false) String keyword, 
+                       @RequestParam(defaultValue = "0") int page,
+                       @RequestParam(defaultValue = "5") int size,
+                       Model model) {
+        
+        int evalPage = page < 0 ? 0 : page;
+        int evalSize = size < 1 ? 5 : size;
+        
+        Pageable pageable = PageRequest.of(evalPage, evalSize);
+        Page<Category> categoryPage = categoryService.search(keyword, pageable);
+        
+        if (evalPage > 0 && evalPage >= categoryPage.getTotalPages() && categoryPage.getTotalPages() > 0) {
+            return "redirect:/admin/categories?page=" + (categoryPage.getTotalPages() - 1) + 
+                   (keyword != null ? "&keyword=" + keyword : "") + "&size=" + evalSize;
+        }
+
+        model.addAttribute("categoryPage", categoryPage);
         model.addAttribute("keyword", keyword);
         return "admin/category/list";
     }

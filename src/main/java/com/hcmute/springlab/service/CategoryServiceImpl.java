@@ -5,6 +5,9 @@ import com.hcmute.springlab.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -40,6 +43,14 @@ public class CategoryServiceImpl implements CategoryService {
             return findAll();
         }
         return categoryRepository.findByNameContainingIgnoreCase(name);
+    }
+
+    @Override
+    public Page<Category> search(String keyword, Pageable pageable) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return categoryRepository.findAll(pageable);
+        }
+        return categoryRepository.findByNameContainingIgnoreCase(keyword, pageable);
     }
 }
 
