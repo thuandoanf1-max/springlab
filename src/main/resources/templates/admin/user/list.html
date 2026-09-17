@@ -1,47 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/main}">
-<head>
-    <title>Manage Users</title>
-</head>
-<body>
-    <div layout:fragment="content">
-        <h2>Manage Users</h2>
-
-        <form th:action="@{/admin/users}" method="get">
-            <input type="text" name="keyword" th:value="${keyword}" placeholder="Search..." />
-            <button type="submit">Search</button>
-        </form>
-        <br/>
-        <a th:href="@{/admin/users/create}">Create New User</a>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Username</th>
-                    <th>Fullname</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="user : ${users}">
-                    <td th:text="${user.id}"></td>
-                    <td th:text="${user.username}"></td>
-                    <td th:text="${user.fullname}"></td>
-                    <td th:text="${user.email}"></td>
-                    <td th:text="${user.role}"></td>
-                    <td>
-                        <a th:href="@{/admin/users/edit/{id}(id=${user.id})}">Edit</a> |
-                        <a th:href="@{/admin/users/delete/{id}(id=${user.id})}" onclick="return confirm('Are you sure?');">Delete</a>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</body>
-</html>
-
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/main}">
+<head><title>Manage Users</title></head><body><div layout:fragment="content">
+    <div class="page-header"><div class="page-heading"><span class="page-icon"><i class="bi bi-people"></i></span><div><p class="eyebrow">Access control</p><h1>Users</h1><p>Manage system users</p></div></div><a th:href="@{/admin/users/create}" class="btn btn-primary app-primary-btn"><i class="bi bi-person-plus"></i> Add User</a></div>
+    <section class="data-card"><div class="card-toolbar"><div><h2>User list</h2><p>Search or update user access details</p></div></div><form th:action="@{/admin/users}" method="get" class="search-form"><div class="input-group"><span class="input-group-text"><i class="bi bi-search"></i></span><input type="text" name="keyword" th:value="${keyword}" class="form-control" placeholder="Search username, name, or email"><button type="submit" class="btn btn-primary">Search</button></div></form><div class="table-responsive"><table class="table app-table mb-0"><thead><tr><th>ID</th><th>Username</th><th>Full Name</th><th>Email</th><th>Role</th><th class="text-end">Actions</th></tr></thead><tbody><tr th:each="user : ${users}"><td th:text="${user.id}"></td><td class="fw-semibold" th:text="${user.username}"></td><td th:text="${user.fullname}"></td><td th:text="${user.email}"></td><td><span class="role-badge" th:classappend="${user.role == 'ADMIN'} ? ' role-admin' : ' role-user'" th:text="${user.role}"></span></td><td class="text-end"><a class="btn btn-sm btn-outline-primary me-1" th:href="@{/admin/users/edit/{id}(id=${user.id})}"><i class="bi bi-pencil"></i> Edit</a><a class="btn btn-sm btn-outline-danger" th:href="@{/admin/users/delete/{id}(id=${user.id})}" onclick="return confirm('Are you sure?');"><i class="bi bi-trash"></i> Delete</a></td></tr></tbody></table></div></section>
+</div></body></html>

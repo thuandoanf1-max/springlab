@@ -1,67 +1,31 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/main}">
-<head>
-    <title>Manage Categories</title>
-</head>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/main}">
+<head><title>Manage Categories</title></head>
 <body>
-    <div layout:fragment="content">
-        <h2>Manage Categories</h2>
-
-        <form th:action="@{/admin/categories}" method="get">
-            <input type="text" name="keyword" th:value="${keyword}" placeholder="Search by name..." />
-            <button type="submit">Search</button>
-        </form>
-        <br/>
-        <a th:href="@{/admin/categories/create}">Create New Category</a>
-
-        <div th:if="${categoryPage == null or categoryPage.isEmpty()}">
-            <p>No results found.</p>
-        </div>
-
-        <table th:if="${categoryPage != null and !categoryPage.isEmpty()}">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Image</th>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="item : ${categoryPage.content}">
-                    <td th:text="${item.id}"></td>
-                    <td>
-                        <img th:if="${item.image != null and !item.image.isEmpty()}" 
-                             th:src="@{'/uploads/' + ${item.image}}" width="50" height="50" style="object-fit: cover;" />
-                    </td>
-                    <td th:text="${item.name}"></td>
-                    <td th:text="${item.description}"></td>
-                    <td>
-                        <a th:href="@{/admin/categories/edit/{id}(id=${item.id})}">Edit</a> |
-                        <a th:href="@{/admin/categories/delete/{id}(id=${item.id})}" onclick="return confirm('Are you sure?');">Delete</a>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-
-        <div class="pagination" th:if="${categoryPage != null and categoryPage.totalPages > 0}">
-            <a th:if="${categoryPage.hasPrevious()}"
-               th:href="@{/admin/categories(keyword=${keyword}, page=${categoryPage.number - 1}, size=${categoryPage.size})}">Previous</a>
-
-            <th:block th:each="i : ${#numbers.sequence(0, categoryPage.totalPages - 1)}">
-                <span th:if="${i == categoryPage.number}" class="current" th:text="${i + 1}"></span>
-                <a th:if="${i != categoryPage.number}"
-                   th:href="@{/admin/categories(keyword=${keyword}, page=${i}, size=${categoryPage.size})}"
-                   th:text="${i + 1}"></a>
-            </th:block>
-
-            <a th:if="${categoryPage.hasNext()}"
-               th:href="@{/admin/categories(keyword=${keyword}, page=${categoryPage.number + 1}, size=${categoryPage.size})}">Next</a>
-        </div>
+<div layout:fragment="content">
+    <div class="page-header">
+        <div class="page-heading"><span class="page-icon"><i class="bi bi-tags"></i></span><div><p class="eyebrow">Catalog</p><h1>Categories</h1><p>Manage your product categories</p></div></div>
+        <button id="addCategoryButton" type="button" class="btn btn-primary app-primary-btn"><i class="bi bi-plus-lg"></i> Add Category</button>
     </div>
+    <div id="categoryAlert" class="alert d-none" role="alert"></div>
+    <section class="data-card">
+        <div class="card-toolbar"><div><h2>Category list</h2><p>All categories available in your catalog</p></div><span class="stat-pill"><i class="bi bi-collection"></i> <strong id="categoryCount">0</strong> total</span></div>
+        <div class="table-responsive"><table class="table app-table mb-0"><thead><tr><th>ID</th><th>Image</th><th>Name</th><th>Description</th><th class="text-end">Actions</th></tr></thead><tbody id="categoryTableBody"></tbody></table></div>
+        <div id="emptyMessage" class="empty-state d-none"><i class="bi bi-tags"></i><h3>No categories found</h3><p>Add a category to begin organizing your products.</p></div>
+    </section>
+    <div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered"><div class="modal-content"><form id="categoryForm" enctype="multipart/form-data">
+            <div class="modal-header"><h5 class="modal-title" id="categoryModalLabel"><i class="bi bi-tag"></i> Add Category</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+            <div class="modal-body">
+                <input id="categoryId" type="hidden">
+                <div class="mb-3"><label for="categoryName" class="form-label">Name</label><input id="categoryName" name="name" type="text" class="form-control" maxlength="100" placeholder="e.g. Electronics" required></div>
+                <div class="mb-3"><label for="categoryDescription" class="form-label">Description</label><textarea id="categoryDescription" name="description" class="form-control" maxlength="500" rows="4" placeholder="A short description of this category"></textarea></div>
+                <div class="mb-3"><label for="categoryImage" class="form-label">Image</label><input id="categoryImage" name="image" type="file" class="form-control" accept="image/*"><img id="categoryImagePreview" class="upload-preview d-none" alt="Category preview"><div id="currentImageHint" class="form-text d-none"></div></div>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button><button id="categorySubmitButton" type="submit" class="btn btn-primary app-primary-btn">Add Category</button></div>
+        </form></div></div>
+    </div>
+    <script th:src="@{/js/category.js}"></script>
+</div>
 </body>
 </html>
-

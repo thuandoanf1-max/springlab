@@ -4,20 +4,26 @@
     <meta charset="UTF-8">
 </head>
 <body>
-    <div th:fragment="header" class="header">
-        <div class="nav">
-            <a th:href="@{/admin/categories}">Manage Categories</a>
-            <a th:href="@{/admin/users}">Manage Users</a>
+    <nav th:fragment="header" class="navbar navbar-expand-lg app-navbar">
+        <div class="container-fluid app-navbar-inner">
+            <a class="navbar-brand app-brand" th:href="@{/admin/categories}">
+                <span class="brand-mark"><i class="bi bi-boxes"></i></span><span>SpringLab <strong>Admin</strong></span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavigation" aria-controls="adminNavigation" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="adminNavigation">
+                <ul class="navbar-nav me-auto app-nav-links">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/admin/categories}"><i class="bi bi-tags"></i> Categories</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/admin/products}"><i class="bi bi-box-seam"></i> Products</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/admin/users}"><i class="bi bi-people"></i> Users</a></li>
+                </ul>
+                <div class="navbar-profile" th:if="${session.loggedInUser != null}">
+                    <img th:src="@{/images/Thuan.jpg}" alt="Profile avatar" class="avatar" />
+                    <span class="profile-welcome">Welcome, <strong th:text="${session.loggedInUser.fullname}">User</strong></span>
+                    <a class="logout-link" th:href="@{/logout}"><i class="bi bi-box-arrow-right"></i> Logout</a>
+                </div>
+                <a class="login-link" th:if="${session.loggedInUser == null}" th:href="@{/login}">Login</a>
+            </div>
         </div>
-        <div class="profile">
-            <!-- Profile avatar using student image from static/images -->
-            <img th:src="@{/images/Thuan.jpg}" alt="Student Avatar" class="avatar" />
-            <span th:if="${session.loggedInUser != null}" 
-                  th:text="'Welcome, ' + ${session.loggedInUser.fullname} + ' | '">Welcome, User | </span>
-            <a th:if="${session.loggedInUser != null}" th:href="@{/logout}">Logout</a>
-            <a th:if="${session.loggedInUser == null}" th:href="@{/login}">Login</a>
-        </div>
-    </div>
+    </nav>
 </body>
 </html>
-
