@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/main}">
+<head><title>SpringLab Products</title></head>
+<body>
+<div layout:fragment="content">
+    <div class="page-header">
+        <div class="page-heading"><span class="page-icon"><i class="bi bi-shop"></i></span><div><p class="eyebrow">Product catalog</p><h1>Products</h1><p>Browse products by price or category</p></div></div>
+    </div>
+    <div id="homeAlert" class="alert d-none" role="alert"></div>
+    <section class="data-card">
+        <div class="card-toolbar"><div><h2>Products by price</h2><p id="homeStatus">Loading products…</p></div></div>
+        <div class="search-form"><label for="homeCategory" class="form-label">Filter by category</label><select id="homeCategory" class="form-select"><option value="">All products — price ascending</option></select></div>
+        <div id="homeLoading" class="text-center py-4"><span class="spinner-border spinner-border-sm me-2"></span>Loading…</div>
+        <div id="homeProductGrid" class="row g-3 px-4 pb-4"></div>
+        <div id="homeEmpty" class="empty-state d-none"><i class="bi bi-box-seam"></i><h3>No products found</h3><p>Try another category.</p></div>
+    </section>
+    <script th:src="@{/js/graphql-client.js}"></script>
+    <script th:src="@{/js/graphql-home.js}"></script>
+</div>
+</body>
+</html>

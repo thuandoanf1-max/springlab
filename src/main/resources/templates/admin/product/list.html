@@ -10,23 +10,27 @@
     <div id="productAlert" class="alert d-none" role="alert"></div>
     <section class="data-card">
         <div class="card-toolbar"><div><h2>Product list</h2><p>Products currently available in your inventory</p></div><span class="stat-pill"><i class="bi bi-boxes"></i> <strong id="productCount">0</strong> total</span></div>
+        <div class="search-form"><div class="input-group"><span class="input-group-text"><i class="bi bi-search"></i></span><input id="productSearch" type="search" class="form-control" placeholder="Search product name"></div></div>
+        <div id="productLoading" class="px-4 py-3 text-muted" role="status"><span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Loading products...</div>
         <div class="table-responsive"><table class="table app-table mb-0"><thead><tr><th>ID</th><th>Image</th><th>Name</th><th>Quantity</th><th>Price</th><th>Category</th><th class="text-end">Actions</th></tr></thead><tbody id="productTableBody"></tbody></table></div>
         <div id="emptyProductMessage" class="empty-state d-none"><i class="bi bi-box-seam"></i><h3>No products found</h3><p>Add a product to start managing your inventory.</p></div>
+        <nav class="px-4 pb-4" aria-label="Product pages"><ul id="productPagination" class="pagination mb-0"></ul></nav>
     </section>
     <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered"><div class="modal-content"><form id="productForm" enctype="multipart/form-data">
+        <div class="modal-dialog modal-dialog-centered"><div class="modal-content"><form id="productForm">
             <div class="modal-header"><h5 class="modal-title" id="productModalLabel"><i class="bi bi-box-seam"></i> Add Product</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
             <div class="modal-body">
                 <input id="productId" type="hidden">
                 <div class="mb-3"><label for="productName" class="form-label">Product Name</label><input id="productName" name="name" type="text" class="form-control" maxlength="100" placeholder="e.g. Wireless Mouse" required></div>
                 <div class="row g-3 mb-3"><div class="col-md-6"><label for="productQuantity" class="form-label">Quantity</label><input id="productQuantity" name="quantity" type="number" class="form-control" min="0" step="1" required></div><div class="col-md-6"><label for="productPrice" class="form-label">Price</label><input id="productPrice" name="price" type="number" class="form-control" min="0" step="0.01" required></div></div>
                 <div class="mb-3"><label for="productCategory" class="form-label">Category</label><select id="productCategory" name="categoryId" class="form-select" required></select></div>
-                <div class="mb-3"><label for="productImage" class="form-label">Image</label><input id="productImage" name="image" type="file" class="form-control" accept="image/*"><img id="productImagePreview" class="upload-preview d-none" alt="Product preview"><div id="currentProductImageHint" class="form-text d-none"></div></div>
+                <div class="mb-3"><label for="productImage" class="form-label">Image path (optional)</label><input id="productImage" name="image" type="text" class="form-control" maxlength="255" placeholder="Existing image filename or URL"><div class="form-text">GraphQL stores an optional image path; file upload remains available only in the legacy REST API.</div></div>
             </div>
             <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button><button id="productSubmitButton" type="submit" class="btn btn-primary app-primary-btn">Add Product</button></div>
         </form></div></div>
     </div>
-    <script th:src="@{/js/product.js}"></script>
+    <script th:src="@{/js/graphql-client.js}"></script>
+    <script th:src="@{/js/graphql-product.js}"></script>
 </div>
 </body>
 </html>

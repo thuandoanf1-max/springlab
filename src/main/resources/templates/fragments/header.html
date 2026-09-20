@@ -6,12 +6,13 @@
 <body>
     <nav th:fragment="header" class="navbar navbar-expand-lg app-navbar">
         <div class="container-fluid app-navbar-inner">
-            <a class="navbar-brand app-brand" th:href="@{/admin/categories}">
+            <a class="navbar-brand app-brand" th:href="@{/}">
                 <span class="brand-mark"><i class="bi bi-boxes"></i></span><span>SpringLab <strong>Admin</strong></span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavigation" aria-controls="adminNavigation" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse" id="adminNavigation">
                 <ul class="navbar-nav me-auto app-nav-links">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/}"><i class="bi bi-house"></i> Home</a></li>
                     <li class="nav-item"><a class="nav-link" th:href="@{/admin/categories}"><i class="bi bi-tags"></i> Categories</a></li>
                     <li class="nav-item"><a class="nav-link" th:href="@{/admin/products}"><i class="bi bi-box-seam"></i> Products</a></li>
                     <li class="nav-item"><a class="nav-link" th:href="@{/admin/users}"><i class="bi bi-people"></i> Users</a></li>

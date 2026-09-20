@@ -10,22 +10,26 @@
     <div id="categoryAlert" class="alert d-none" role="alert"></div>
     <section class="data-card">
         <div class="card-toolbar"><div><h2>Category list</h2><p>All categories available in your catalog</p></div><span class="stat-pill"><i class="bi bi-collection"></i> <strong id="categoryCount">0</strong> total</span></div>
+        <div class="search-form"><div class="input-group"><span class="input-group-text"><i class="bi bi-search"></i></span><input id="categorySearch" type="search" class="form-control" placeholder="Search category name"></div></div>
+        <div id="categoryLoading" class="px-4 py-3 text-muted" role="status"><span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Loading categories...</div>
         <div class="table-responsive"><table class="table app-table mb-0"><thead><tr><th>ID</th><th>Image</th><th>Name</th><th>Description</th><th class="text-end">Actions</th></tr></thead><tbody id="categoryTableBody"></tbody></table></div>
         <div id="emptyMessage" class="empty-state d-none"><i class="bi bi-tags"></i><h3>No categories found</h3><p>Add a category to begin organizing your products.</p></div>
+        <nav class="px-4 pb-4" aria-label="Category pages"><ul id="categoryPagination" class="pagination mb-0"></ul></nav>
     </section>
     <div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered"><div class="modal-content"><form id="categoryForm" enctype="multipart/form-data">
+        <div class="modal-dialog modal-dialog-centered"><div class="modal-content"><form id="categoryForm">
             <div class="modal-header"><h5 class="modal-title" id="categoryModalLabel"><i class="bi bi-tag"></i> Add Category</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
             <div class="modal-body">
                 <input id="categoryId" type="hidden">
                 <div class="mb-3"><label for="categoryName" class="form-label">Name</label><input id="categoryName" name="name" type="text" class="form-control" maxlength="100" placeholder="e.g. Electronics" required></div>
                 <div class="mb-3"><label for="categoryDescription" class="form-label">Description</label><textarea id="categoryDescription" name="description" class="form-control" maxlength="500" rows="4" placeholder="A short description of this category"></textarea></div>
-                <div class="mb-3"><label for="categoryImage" class="form-label">Image</label><input id="categoryImage" name="image" type="file" class="form-control" accept="image/*"><img id="categoryImagePreview" class="upload-preview d-none" alt="Category preview"><div id="currentImageHint" class="form-text d-none"></div></div>
+                <div class="mb-3"><label for="categoryImage" class="form-label">Image path (optional)</label><input id="categoryImage" name="image" type="text" class="form-control" maxlength="255" placeholder="Existing image filename or URL"><div class="form-text">GraphQL stores an optional image path; file upload remains available only in the legacy REST API.</div></div>
             </div>
             <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button><button id="categorySubmitButton" type="submit" class="btn btn-primary app-primary-btn">Add Category</button></div>
         </form></div></div>
     </div>
-    <script th:src="@{/js/category.js}"></script>
+    <script th:src="@{/js/graphql-client.js}"></script>
+    <script th:src="@{/js/graphql-category.js}"></script>
 </div>
 </body>
 </html>
