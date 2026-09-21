@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StringUtils;
 
 @Component
@@ -17,13 +18,16 @@ public class AdminInitializer implements CommandLineRunner {
     private final UserRepository userRepository;
     private final String adminUsername;
     private final String adminPassword;
+    private final PasswordEncoder passwordEncoder;
 
     public AdminInitializer(UserRepository userRepository,
                             @Value("${app.admin.username:admin}") String adminUsername,
-                            @Value("${app.admin.password:}") String adminPassword) {
+                            @Value("${app.admin.password:}") String adminPassword,
+                            PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.adminUsername = adminUsername;
         this.adminPassword = adminPassword;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -36,10 +40,11 @@ public class AdminInitializer implements CommandLineRunner {
 
             User admin = new User();
             admin.setUsername(adminUsername);
-            admin.setPassword(adminPassword);
+            admin.setPassword(passwordEncoder.encode(adminPassword));
             admin.setFullname("System Administrator");
             admin.setEmail("admin@localhost.com");
             admin.setRole("ADMIN");
+            admin.setEnabled(true);
             userRepository.save(admin);
             logger.info("Default ADMIN user created: {}", adminUsername);
         }

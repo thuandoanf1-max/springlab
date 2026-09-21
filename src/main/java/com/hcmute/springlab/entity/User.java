@@ -36,8 +36,14 @@ public class User {
     @Column(length = 100)
     private String email;
 
+    @Column(length = 255)
+    private String image;
+
+    // Nullable in the database for a safe ddl-auto=update transition; null means enabled for legacy rows.
+    @Column
+    private Boolean enabled = true;
+
     @NotBlank(message = "Role is required")
     @Column(nullable = false, length = 20)
     private String role; // "ADMIN" or "USER"
 }
-

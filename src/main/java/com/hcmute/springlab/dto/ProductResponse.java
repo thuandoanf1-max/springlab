@@ -9,7 +9,10 @@ public record ProductResponse(
         Double price,
         String image,
         Long categoryId,
-        String categoryName) {
+        String categoryName,
+        Long userId,
+        String username,
+        String userFullname) {
 
     public static ProductResponse from(Product product) {
         return new ProductResponse(
@@ -19,6 +22,9 @@ public record ProductResponse(
                 product.getPrice(),
                 product.getImage(),
                 product.getCategory().getId(),
-                product.getCategory().getName());
+                product.getCategory().getName(),
+                product.getUser() == null ? null : product.getUser().getId(),
+                product.getUser() == null ? null : product.getUser().getUsername(),
+                product.getUser() == null ? null : product.getUser().getFullname());
     }
 }

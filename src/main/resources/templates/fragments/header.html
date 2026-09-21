@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
 <head>
     <meta charset="UTF-8">
 </head>
@@ -17,12 +17,12 @@
                     <li class="nav-item"><a class="nav-link" th:href="@{/admin/products}"><i class="bi bi-box-seam"></i> Products</a></li>
                     <li class="nav-item"><a class="nav-link" th:href="@{/admin/users}"><i class="bi bi-people"></i> Users</a></li>
                 </ul>
-                <div class="navbar-profile" th:if="${session.loggedInUser != null}">
-                    <img th:src="@{/images/Thuan.jpg}" alt="Profile avatar" class="avatar" />
-                    <span class="profile-welcome">Welcome, <strong th:text="${session.loggedInUser.fullname}">User</strong></span>
-                    <a class="logout-link" th:href="@{/logout}"><i class="bi bi-box-arrow-right"></i> Logout</a>
+                <div class="navbar-profile" sec:authorize="isAuthenticated()">
+                    <img th:src="${currentUser != null and !#strings.isEmpty(currentUser.image) ? currentUser.image : '/images/avatar-placeholder.png'}" alt="Profile avatar" class="avatar" />
+                    <span class="profile-welcome">Welcome, <strong th:text="${currentUser != null ? currentUser.fullname : #authentication.name}">User</strong> <small th:if="${currentUser != null}" th:text="${currentUser.role}">ROLE</small></span>
+                    <form th:action="@{/logout}" method="post" class="d-inline"><input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"><button type="submit" class="logout-link border-0 bg-transparent"><i class="bi bi-box-arrow-right"></i> Logout</button></form>
                 </div>
-                <a class="login-link" th:if="${session.loggedInUser == null}" th:href="@{/login}">Login</a>
+                <a class="login-link" sec:authorize="isAnonymous()" th:href="@{/login}">Login</a>
             </div>
         </div>
     </nav>

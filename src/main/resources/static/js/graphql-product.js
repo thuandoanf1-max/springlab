@@ -17,7 +17,7 @@
     const priceInput = document.querySelector('#productPrice');
     const categoryInput = document.querySelector('#productCategory');
     const imageInput = document.querySelector('#productImage');
-    const fields = 'id name quantity price image category { id name }';
+    const fields = 'id name quantity price image category { id name } owner { id username fullname }';
 
     function showMessage(text, type = 'danger') { alertBox.textContent = text; alertBox.className = `alert alert-${type}`; }
     function clearMessage() { alertBox.textContent = ''; alertBox.className = 'alert d-none'; }
@@ -33,7 +33,7 @@
     }
     function render(page) {
         tableBody.replaceChildren(); count.textContent = page.totalElements; empty.classList.toggle('d-none', page.content.length !== 0);
-        page.content.forEach(product => { const row = document.createElement('tr'); textCell(row, product.id); row.appendChild(imageCell(product.image)); textCell(row, product.name); textCell(row, product.quantity); textCell(row, new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(product.price), 'fw-semibold'); textCell(row, product.category.name); row.appendChild(actionCell(product)); tableBody.appendChild(row); });
+        page.content.forEach(product => { const row = document.createElement('tr'); textCell(row, product.id); row.appendChild(imageCell(product.image)); textCell(row, product.name); textCell(row, product.quantity); textCell(row, new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(product.price), 'fw-semibold'); textCell(row, product.category.name); textCell(row, product.owner ? `${product.owner.fullname} (${product.owner.username})` : 'Legacy / unassigned'); row.appendChild(actionCell(product)); tableBody.appendChild(row); });
         renderPagination(page);
     }
     function renderPagination(page) {

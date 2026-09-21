@@ -87,7 +87,7 @@ public class ProductRestController {
             product.setImage(saveImage(image));
         }
 
-        Product savedProduct = productService.save(product);
+        Product savedProduct = productService.createForCurrentUser(product);
         return ResponseEntity.status(HttpStatus.CREATED).body(ProductResponse.from(savedProduct));
     }
 

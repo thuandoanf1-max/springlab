@@ -1,6 +1,65 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/main}">
-<head><title>User Form</title></head><body><div layout:fragment="content">
-    <div class="page-header compact-header"><div class="page-heading"><span class="page-icon"><i class="bi bi-person-gear"></i></span><div><p class="eyebrow">User management</p><h1 th:text="${user.id == null ? 'Add User' : 'Edit User'}">User</h1><p>Configure account details and access role</p></div></div><a th:href="@{/admin/users}" class="btn btn-light"><i class="bi bi-arrow-left"></i> Back to Users</a></div>
-    <section class="form-card"><form th:action="${user.id == null ? '/admin/users/create' : '/admin/users/edit/' + user.id}" th:object="${user}" method="post"><input type="hidden" th:field="*{id}"><div class="row g-4"><div class="col-md-6"><label for="username" class="form-label">Username</label><input id="username" type="text" th:field="*{username}" class="form-control" placeholder="Enter username"><span th:if="${#fields.hasErrors('username')}" th:errors="*{username}" class="error"></span></div><div class="col-md-6" th:if="${user.id == null}"><label for="password" class="form-label">Password</label><input id="password" type="password" th:field="*{password}" class="form-control" placeholder="Enter password"><span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="error"></span></div><div class="col-md-6"><label for="fullname" class="form-label">Full Name</label><input id="fullname" type="text" th:field="*{fullname}" class="form-control" placeholder="Enter full name"><span th:if="${#fields.hasErrors('fullname')}" th:errors="*{fullname}" class="error"></span></div><div class="col-md-6"><label for="email" class="form-label">Email</label><input id="email" type="email" th:field="*{email}" class="form-control" placeholder="name@example.com"><span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="error"></span></div><div class="col-md-6"><label for="role" class="form-label">Role</label><select id="role" th:field="*{role}" class="form-select"><option value="ADMIN">ADMIN</option><option value="USER">USER</option></select><span th:if="${#fields.hasErrors('role')}" th:errors="*{role}" class="error"></span></div></div><div class="form-actions"><a th:href="@{/admin/users}" class="btn btn-light">Cancel</a><button type="submit" class="btn btn-primary app-primary-btn"><i class="bi bi-check-lg"></i> Save User</button></div></form></section>
-</div></body></html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head><title>User Form</title></head>
+<body>
+<div layout:fragment="content">
+    <div class="page-header compact-header">
+        <div class="page-heading">
+            <span class="page-icon"><i class="bi bi-person-gear"></i></span>
+            <div><p class="eyebrow">User management</p><h1 th:text="${user.id == null ? 'Add User' : 'Edit User'}">User</h1><p>Configure account details and access role</p></div>
+        </div>
+        <a th:href="@{/admin/users}" class="btn btn-light"><i class="bi bi-arrow-left"></i> Back to Users</a>
+    </div>
+    <section class="form-card">
+        <form th:action="${user.id == null ? '/admin/users/create' : '/admin/users/edit/' + user.id}" th:object="${user}" method="post">
+            <input type="hidden" th:field="*{id}">
+            <div class="alert alert-danger" th:if="${#fields.hasGlobalErrors()}" th:each="error : ${#fields.globalErrors()}" th:text="${error}"></div>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label for="username" class="form-label">Username</label>
+                    <input id="username" type="text" th:field="*{username}" class="form-control" th:readonly="${user.id != null}" placeholder="Enter username">
+                    <span th:if="${#fields.hasErrors('username')}" th:errors="*{username}" class="error"></span>
+                </div>
+                <div class="col-md-6">
+                    <label for="password" class="form-label">Password</label>
+                    <input id="password" type="password" th:field="*{password}" class="form-control" th:placeholder="${user.id == null ? 'Enter password' : 'Leave blank to keep current password'}">
+                    <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="error"></span>
+                </div>
+                <div class="col-md-6">
+                    <label for="fullname" class="form-label">Full Name</label>
+                    <input id="fullname" type="text" th:field="*{fullname}" class="form-control" placeholder="Enter full name">
+                    <span th:if="${#fields.hasErrors('fullname')}" th:errors="*{fullname}" class="error"></span>
+                </div>
+                <div class="col-md-6">
+                    <label for="email" class="form-label">Email</label>
+                    <input id="email" type="email" th:field="*{email}" class="form-control" placeholder="name@example.com">
+                    <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="error"></span>
+                </div>
+                <div class="col-md-6">
+                    <label for="image" class="form-label">Image URL</label>
+                    <input id="image" type="text" th:field="*{image}" class="form-control" placeholder="Optional image URL">
+                    <span th:if="${#fields.hasErrors('image')}" th:errors="*{image}" class="error"></span>
+                </div>
+                <div class="col-md-6">
+                    <label for="role" class="form-label">Role</label>
+                    <select id="role" th:field="*{role}" class="form-select"><option value="ADMIN">ADMIN</option><option value="USER">USER</option></select>
+                    <span th:if="${#fields.hasErrors('role')}" th:errors="*{role}" class="error"></span>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-check mt-4">
+                        <input id="enabled" type="checkbox" th:field="*{enabled}" class="form-check-input">
+                        <label for="enabled" class="form-check-label">Account enabled</label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-actions">
+                <a th:href="@{/admin/users}" class="btn btn-light">Cancel</a>
+                <button type="submit" class="btn btn-primary app-primary-btn"><i class="bi bi-check-lg"></i> Save User</button>
+            </div>
+        </form>
+    </section>
+</div>
+</body>
+</html>

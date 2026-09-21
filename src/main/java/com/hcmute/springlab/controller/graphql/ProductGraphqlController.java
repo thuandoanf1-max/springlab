@@ -1,6 +1,7 @@
 package com.hcmute.springlab.controller.graphql;
 
 import com.hcmute.springlab.dto.graphql.ProductInput;
+import com.hcmute.springlab.dto.graphql.ProductOwnerResponse;
 import com.hcmute.springlab.dto.graphql.ProductPage;
 import com.hcmute.springlab.entity.Category;
 import com.hcmute.springlab.entity.Product;
@@ -14,6 +15,7 @@ import com.hcmute.springlab.service.ProductService;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.graphql.data.method.annotation.SchemaMapping;
 import org.springframework.stereotype.Controller;
 
 import java.util.List;
@@ -60,8 +62,10 @@ public class ProductGraphqlController {
     }
 
     @QueryMapping
-    public ProductPage searchProducts(@Argument String keyword, @Argument Integer page, @Argument Integer size) {
-        return ProductPage.from(productService.search(keyword, pageRequestFactory.create(page, size)));
+    public ProductPage searchProducts(@Argument String keyword, @Argument Long categoryId, @Argument Long ownerId,
+                                      @Argument Integer page, @Argument Integer size) {
+        return ProductPage.from(productService.search(
+                keyword, categoryId, ownerId, pageRequestFactory.create(page, size)));
     }
 
     @MutationMapping
@@ -70,7 +74,7 @@ public class ProductGraphqlController {
         Product product = new Product();
         applyInput(product, input, true);
         entityValidator.validate(product);
-        return productService.save(product);
+        return productService.createForCurrentUser(product);
     }
 
     @MutationMapping
@@ -91,6 +95,11 @@ public class ProductGraphqlController {
         }
         productService.deleteById(id);
         return true;
+    }
+
+    @SchemaMapping(typeName = "Product", field = "owner")
+    public ProductOwnerResponse owner(Product product) {
+        return ProductOwnerResponse.from(product.getUser());
     }
 
     private void applyInput(Product product, ProductInput input, boolean creating) {

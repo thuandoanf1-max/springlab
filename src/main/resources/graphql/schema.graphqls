@@ -12,6 +12,13 @@ type Product {
     price: Float!
     image: String
     category: Category!
+    owner: ProductOwner
+}
+
+type ProductOwner {
+    id: ID!
+    username: String!
+    fullname: String!
 }
 
 type ProductPage {
@@ -49,7 +56,7 @@ type Query {
     productById(id: ID!): Product
     productsByPriceAsc: [Product!]!
     productsByCategory(categoryId: ID!): [Product!]!
-    searchProducts(keyword: String, page: Int = 0, size: Int = 5): ProductPage!
+    searchProducts(keyword: String, categoryId: ID, ownerId: ID, page: Int = 0, size: Int = 5): ProductPage!
     categories: [Category!]!
     categoryById(id: ID!): Category
     searchCategories(keyword: String, page: Int = 0, size: Int = 5): CategoryPage!

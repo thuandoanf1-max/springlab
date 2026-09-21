@@ -2,20 +2,27 @@ package com.hcmute.springlab.service;
 
 import com.hcmute.springlab.entity.Product;
 import com.hcmute.springlab.repository.ProductRepository;
+import com.hcmute.springlab.security.CurrentUserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
+    private final CurrentUserService currentUserService;
 
-    public ProductServiceImpl(ProductRepository productRepository) {
+    public ProductServiceImpl(ProductRepository productRepository, CurrentUserService currentUserService) {
         this.productRepository = productRepository;
+        this.currentUserService = currentUserService;
     }
 
     @Override
@@ -30,6 +37,16 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product save(Product product) {
+        return productRepository.save(product);
+    }
+
+    @Override
+    @Transactional
+    public Product createForCurrentUser(Product product) {
+        if (product.getId() != null) {
+            throw new IllegalArgumentException("A new product must not already have an ID");
+        }
+        product.setUser(currentUserService.requireCurrentUserEntity());
         return productRepository.save(product);
     }
 
@@ -57,10 +74,31 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<Product> search(String keyword, Pageable pageable) {
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return productRepository.findAll(pageable);
+        return search(keyword, null, null, pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Product> search(String keyword, Long categoryId, Long ownerId, Pageable pageable) {
+        String normalizedKeyword = keyword == null || keyword.isBlank() ? null : keyword.trim();
+        return productRepository.search(normalizedKeyword, categoryId, ownerId, pageable);
+    }
+
+    @Override
+    public long countByUserId(Long userId) {
+        return productRepository.countByUserId(userId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<Long, Long> countByUserIds(Collection<Long> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return Map.of();
         }
-        return productRepository.findByNameContainingIgnoreCase(keyword, pageable);
+        return productRepository.countProductsByUserIds(userIds).stream()
+                .collect(Collectors.toMap(ProductRepository.UserProductCount::getUserId,
+                        ProductRepository.UserProductCount::getProductCount));
     }
 }

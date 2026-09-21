@@ -3,6 +3,14 @@ package com.hcmute.springlab;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import com.hcmute.springlab.entity.User;
+import com.hcmute.springlab.dto.UserResponse;
+import com.hcmute.springlab.mapper.UserMapper;
+import com.hcmute.springlab.repository.UserRepository;
+import com.hcmute.springlab.service.UserService;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextImpl;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,26 +22,52 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.util.Map;
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 
-@SpringBootTest
+@SpringBootTest(properties = {"spring.mail.username=", "spring.mail.password=", "app.admin.password="})
 @AutoConfigureMockMvc
 class SpringlabApplicationTests {
+
+	@org.springframework.test.context.bean.override.mockito.MockitoBean
+	private com.hcmute.springlab.service.EmailService emailService;
+
+	@org.springframework.test.context.bean.override.mockito.MockitoBean
+	private org.springframework.mail.javamail.JavaMailSender mailSender;
+
+	@org.junit.jupiter.api.AfterEach
+	void noSmtpCalls() {
+		org.mockito.Mockito.verifyNoInteractions(emailService, mailSender);
+	}
 
 	@Autowired
 	private MockMvc mockMvc;
 
 	@Autowired
 	private ObjectMapper objectMapper;
+
+	@Autowired
+	private UserRepository userRepository;
+
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+
+	@Autowired
+	private UserMapper userMapper;
+
+	@Autowired
+	private UserService userService;
 
 	@Test
 	void contextLoads() {
@@ -55,6 +89,92 @@ class SpringlabApplicationTests {
 				.andExpect(status().isOk())
 				.andExpect(content().string(containsString("/js/graphql-category.js")))
 				.andExpect(content().string(not(containsString("/js/category.js"))));
+	}
+
+	@Test
+	void securitySupportsBcryptUsernameEmailLegacyMigrationAndLogout() throws Exception {
+		User admin = new User(null, "phase1-admin", passwordEncoder.encode("secret123"), "Phase One Admin",
+				"phase1-admin@example.com", null, true, "ADMIN");
+		userRepository.save(admin);
+		User legacyUser = new User(null, "phase1-legacy", "legacy123", "Legacy User",
+				"phase1-legacy@example.com", null, true, "USER");
+		userRepository.save(legacyUser);
+
+		mockMvc.perform(get("/admin/categories"))
+				.andExpect(status().is3xxRedirection());
+		mockMvc.perform(get("/admin/categories").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user("user").roles("USER")))
+				.andExpect(status().isForbidden());
+
+		MvcResult adminLogin = mockMvc.perform(post("/login").with(csrf())
+				.param("username", "phase1-admin")
+				.param("password", "secret123"))
+				.andExpect(status().is3xxRedirection())
+				.andExpect(redirectedUrl("/admin/categories"))
+				.andExpect(org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated().withUsername("phase1-admin").withRoles("ADMIN"))
+				.andReturn();
+		assertTrue(passwordEncoder.matches("secret123", userRepository.findById(admin.getId()).orElseThrow().getPassword()));
+
+		mockMvc.perform(post("/login").with(csrf())
+				.param("username", "phase1-admin@example.com")
+				.param("password", "secret123"))
+				.andExpect(redirectedUrl("/admin/categories"))
+				.andExpect(org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated().withUsername("phase1-admin").withRoles("ADMIN"));
+		mockMvc.perform(post("/login").with(csrf())
+				.param("username", "phase1-legacy")
+				.param("password", "legacy123"))
+				.andExpect(status().is3xxRedirection());
+		assertTrue(passwordEncoder.matches("legacy123", userRepository.findById(legacyUser.getId()).orElseThrow().getPassword()));
+
+		MockHttpSession session = (MockHttpSession) adminLogin.getRequest().getSession(false);
+		mockMvc.perform(get("/admin/users").session(session)).andExpect(status().isOk());
+		mockMvc.perform(post("/logout").session(session).with(csrf()))
+				.andExpect(status().is3xxRedirection());
+	}
+
+	@Test
+	void userDtoMapperHeaderAndPasswordEditAreSafe() throws Exception {
+		User user = new User(null, "phase2-user", passwordEncoder.encode("old-password"), "Phase Two User",
+				"phase2-user@example.com", null, true, "ADMIN");
+		userRepository.save(user);
+
+		UserResponse response = userMapper.toResponse(user);
+		assertEquals("Phase Two User", response.fullname());
+		assertTrue(Arrays.stream(UserResponse.class.getRecordComponents())
+				.noneMatch(component -> component.getName().equals("password")));
+
+		String originalPassword = user.getPassword();
+		User blankPasswordUpdate = new User(user.getId(), user.getUsername(), "", user.getFullname(), user.getEmail(),
+				null, true, user.getRole());
+		userService.save(blankPasswordUpdate);
+		assertEquals(originalPassword, userRepository.findById(user.getId()).orElseThrow().getPassword());
+
+		User newPasswordUpdate = new User(user.getId(), user.getUsername(), "new-password", user.getFullname(), user.getEmail(),
+				null, true, user.getRole());
+		userService.save(newPasswordUpdate);
+		assertTrue(passwordEncoder.matches("new-password", userRepository.findById(user.getId()).orElseThrow().getPassword()));
+
+		MvcResult login = mockMvc.perform(post("/login").with(csrf())
+				.param("username", user.getUsername())
+				.param("password", "new-password"))
+				.andExpect(status().is3xxRedirection())
+				.andReturn();
+		MockHttpSession session = (MockHttpSession) login.getRequest().getSession(false);
+		mockMvc.perform(get("/").session(session))
+				.andExpect(status().isOk())
+				.andExpect(content().string(containsString("Phase Two User")))
+				.andExpect(content().string(containsString("/images/avatar-placeholder.png")));
+	}
+
+	@Test
+	void disabledUserCannotLogin() throws Exception {
+		User disabledUser = new User(null, "phase2-disabled", passwordEncoder.encode("disabled-password"), "Disabled User",
+				"phase2-disabled@example.com", null, false, "USER");
+		userRepository.save(disabledUser);
+		mockMvc.perform(post("/login").with(csrf())
+				.param("username", "phase2-disabled")
+				.param("password", "disabled-password"))
+				.andExpect(status().is3xxRedirection())
+				.andExpect(redirectedUrl("/login?error"));
 	}
 
 	@Test
@@ -148,10 +268,15 @@ class SpringlabApplicationTests {
 	}
 
 	private MockHttpSession adminSession() {
-		User admin = new User();
-		admin.setRole("ADMIN");
+		if (userRepository.findByUsernameIgnoreCase("admin").isEmpty()) {
+			userRepository.save(new User(null, "admin", passwordEncoder.encode("test-admin-password"),
+					"Test Administrator", "test-admin@example.com", null, true, "ADMIN"));
+		}
 		MockHttpSession session = new MockHttpSession();
-		session.setAttribute("loggedInUser", admin);
+		SecurityContextImpl context = new SecurityContextImpl();
+		context.setAuthentication(new UsernamePasswordAuthenticationToken(
+				"admin", "N/A", java.util.List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))));
+		session.setAttribute("SPRING_SECURITY_CONTEXT", context);
 		return session;
 	}
 
